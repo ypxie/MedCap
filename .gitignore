@@ -1,0 +1,21 @@
+*.DS_Store
+*.pyc
+*py~
+Data/*
+*.swp
+.vscode
+*~
+temp/*
+dist/*
+build/*
+docs/site/*
+docs/theme/*
+tags
+Keras.egg-info
+
+# test-related
+.coverage
+.cache
+
+# developer environments
+.idea
