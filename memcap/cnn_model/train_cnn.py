@@ -1,35 +1,6 @@
 import sys
 import os
 import argparse
-
-parser = argparse.ArgumentParser(description = 'Bladder Classification')
-parser.add_argument('--batch-size', type=int, default=64, metavar='N'
-                    help='input batch size for training (default: 64)')
-parser.add_argument('--batch-size', type=int, default=64, metavar='N'
-                    help='input batch size for training (default: 64)')
-
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                    help='number of epochs to train (default: 10)')
-parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
-                    help='learning rate (default: 0.01)')
-parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
-                    help='SGD momentum (default: 0.5)')
-parser.add_argument('--no-cuda', action='store_true', default=False,
-                    help='enables CUDA training')
-parser.add_argument('--seed', type=int, default=1, metavar='S',
-                    help='random seed (default: 1)')
-parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                    help='how many batches to wait before logging training status')
-args = parser.parse_args()
-args.cuda = not args.no_cuda and torch.cuda.is_available()
-
-torch.manual_seed(args.seed)
-
-if args.cuda:
-    torch.cuda.manual_seed(args.seed)
-
-
-
 home = os.path.expanduser('~')
 projroot = os.path.join('..','..') 
 
@@ -44,6 +15,7 @@ modelsubfolder = 'residule_conclusion_bladder'
 modelfolder = os.path.join(modelroot, 'Model',trainingset,modelsubfolder)
 
 sys.path.insert(0, os.path.join('..', 'proj_utils') )
+
 
 from time import time
 import numpy as np
@@ -82,13 +54,36 @@ if  __name__ == '__main__':
     batch_size = 2
     meanstd = 0   # it is important to set this as 0 for FCN
     chunknum = int(10000)
-    maxepoch = 1280
     matrefresh = 10
     maxInnerEpoch = 10
     meanstdrefresh = 1
     refershfreq = 10
     savefre = 1  # np.mod(chunidx, savefre) == 0:
     
+    parser = argparse.ArgumentParser(description = 'Bladder Classification')
+    parser.add_argument('--batch-size', type=int, default=64, metavar='N'
+                        help='input batch size for training (default: 64)')
+    parser.add_argument('--maxepoch', type=int, default=128, metavar='N',
+                        help='number of epochs to train (default: 10)')
+    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+                        help='learning rate (default: 0.01)')
+    parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
+                        help='SGD momentum (default: 0.5)')
+    parser.add_argument('--no-cuda', action='store_true', default=False,
+                        help='enables CUDA training')
+    parser.add_argument('--seed', type=int, default=1, metavar='S',
+                        help='random seed (default: 1)')
+    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
+                        help='how many batches to wait before logging training status')
+    args = parser.parse_args()
+    args.cuda = not args.no_cuda and torch.cuda.is_available()
+
+    torch.manual_seed(args.seed)
+
+    if args.cuda:
+        torch.cuda.manual_seed(args.seed)
+
+
     classparams = {}
     classparams['datadir']   =  trainingimagefolder
     classparams['dataExt']   =  ['.png']             # the data ext
@@ -146,7 +141,7 @@ if  __name__ == '__main__':
     
     print('finish compiling!')
     best_score = 0
-    for epochNumber in range(maxepoch):
+    for epochNumber in range(args.maxepoch):
 
       if np.mod(epochNumber+1, refershfreq) == 0:
         Matinfo = StruExtractor.getMatinfo() # call this function to generate nece info
