@@ -15,4 +15,6 @@ class baldder_res_18(nn.Module):
             
     def forward(self, x):
         return self.pretrained_model(x)
-
+    
+    def get_feature(self, x):
+        pass
