@@ -2,6 +2,7 @@
 *.pyc
 *py~
 neuraltalk2/data/*
+memcap/data/*
 Data/*
 *.swp
 .vscode
