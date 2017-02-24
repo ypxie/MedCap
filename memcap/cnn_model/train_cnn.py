@@ -90,7 +90,7 @@ if  __name__ == '__main__':
     classparams['dataExt']   =  ['.png']             # the data ext
     classparams['nameList']  =  train_file_list
     classparams['labelList'] =  train_label_list 
-    classparams['destin_shape']   =  (224,224) 
+    classparams['destin_shape']   =  (224,224)
     classparams['channel']   =  img_channels
     StruExtractor = dataExtractor(classparams)
     
