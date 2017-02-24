@@ -12,8 +12,7 @@ class baldder_res_18(nn.Module):
     def __init__(self, num_class, pretrained_model):
         self.pretrained_model = pretrained_model
         self.pretrained_model.fc = nn.Linear(512, num_class)
-
-    
+            
     def forward(self, x):
         return self.pretrained_model(x)
 

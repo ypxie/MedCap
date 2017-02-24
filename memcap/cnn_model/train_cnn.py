@@ -22,6 +22,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import deepdish as dd
 
+from cnn_model.res_model import baldder_res_18
 from proj_utils.Extractor import ListExtractor as dataExtractor
 from train_eng import get_mean_std
 from proj_utils.local_utils import *
