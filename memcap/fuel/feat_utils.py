@@ -16,7 +16,7 @@ keras_model_path = '/home/yuanpuxie/DataSet/Bladder_Caption/Augmented/Feat_conv/
 
 def make_feat_func(keras_model_path):
     options = dict()
-    params = OrderedDict()
+    params  = OrderedDict()
     tparams = OrderedDict()
 
     load_keras_model(params, keras_model_path, max_layer = 12)
