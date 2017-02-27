@@ -17,10 +17,10 @@ from skimage import color, measure
 import scipy.ndimage
 
 from numba import jit, autojit
-from generic_utils import get_from_module
+#from generic_utils import get_from_module
 import random
-def get(identifier):
-    return get_from_module(identifier, globals(), 'local_utils')
+#def get(identifier):
+#    return get_from_module(identifier, globals(), 'local_utils')
 
 class myobj(object):
     pass
