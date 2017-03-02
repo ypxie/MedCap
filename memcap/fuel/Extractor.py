@@ -76,7 +76,7 @@ class ListExtractor(object):
                    valid = True
                    break
             if valid:   
-                img  = pre_process_img(img, yuv = False,norm=self.local_norm)
+                img  = pre_process_img(img, yuv = False, norm=self.local_norm)
                 if self.destin_shape is not None:
                     shape = tuple(self.destin_shape) + (img.shape[2],)
                     img =  imresize_shape(img,shape)

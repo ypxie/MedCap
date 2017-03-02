@@ -28,7 +28,7 @@ class HomogeneousData():
         
         thisnum = min(self.batch_size, self.Totalnum - self.chunkidx*self.batch_size)
         curr_indices = self.totalIndx[self.chunkstart: self.chunkstart + thisnum]
-
+        
         self.chunkstart += thisnum
         self.chunkidx += 1
 
