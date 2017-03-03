@@ -1,6 +1,8 @@
 import numpy as np
 from copy import copy
 from torch.autograd import Variable
+import random
+from proj_utils.local_utils import pre_process_img
 
 class SimpleData():
     def __init__(self, data, Index, batch_size=128, mode = 'channel', 
@@ -12,7 +14,10 @@ class SimpleData():
         
         self.__dict__.update(locals())
         
-        self.Totalnum = Index.shape[0]
+        self.images = self.data['images']
+        self.conclusion = self.data['conclusion']
+
+        self.Totalnum = len(Index)
 
         self.batch_data = np.zeros( (batch_size,) + self.images.shape[1::])
         self.batch_label = np.zeros((batch_size,) + self.conclusion.shape[1::])
@@ -45,7 +50,8 @@ class SimpleData():
         if self.chunkidx > self.numberofchunk:
             self.reset()
             raise StopIteration()
-        return Variable(self.batch_data[0:thisnum]) , Variable(self.batch_label[0:thisnum])
+
+        return self.batch_data[0:thisnum] , self.batch_label[0:thisnum]
 
     def __iter__(self):
         return self
@@ -56,26 +62,22 @@ class CNNData():
     def __init__(self, data, batch_size=128, split_dict= None, 
                  refer_dict = None):
         '''
+        Construct train, valid and test iterator
+
+        Parameters:
+        -----------
         data: a hdf5 opened pointer
         split_dict:  dictionary{train:[list of file name], test:[], valid: []} 
         refer_dict:  dictionary of {filename:ind}, used to get_split_ind
+
         '''
         self.__dict__.update(locals())
 
-        self.images = self.data['images']
-        self.conclusion = self.data['conclusion']
-        self.Totalnum = self.conclusion.shape[0]
-
-        self.batch_data = np.zeros( (batch_size,) + self.images.shape[1::])
-        self.batch_label = np.zeros((batch_size,) + self.conclusion.shape[1::])
-
-        self.reset()
-
         self.get_split_ind()
         
-        self.train_cls = SimpleData(self.Data, self.train, self.batch_size)
-        self.test_cls  = SimpleData(self.Data, self.test, self.batch_size)
-        self.valid_cls = SimpleData(self.Data, self.valid, self.batch_size)
+        self.train_cls = SimpleData(self.data, self.train, self.batch_size)
+        self.test_cls  = SimpleData(self.data, self.test, self.batch_size)
+        self.valid_cls = SimpleData(self.data, self.valid, self.batch_size)
 
 
     def get_split_ind(self):
@@ -96,7 +98,7 @@ class CNNData():
             self.valid.append(self.refer_dict[name])
         
         
-    def get_flow(split='train'):
+    def get_flow(self, split='train'):
         if split == 'train':
            return self.train_cls
 
