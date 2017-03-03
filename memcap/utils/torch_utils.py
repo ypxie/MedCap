@@ -5,6 +5,26 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import torch.nn as nn
 
+def creteria(pred, label):
+    # both of them should be Tensor (N, dim)
+    target = to_device(Variable(torch.from_numpy(label.cpu().data.argmax(axis=1))).long(), pre)
+    _, target = label.topk(1, dim=1)
+    loss = F.nll_loss(F.log_softmax(pred), target)
+    return loss
+
+def validate(model, valid_flow):
+    acc = []
+    pred_list, target_list = [], []
+    for data, label in valid_flow:
+        pred = model.forward(data)
+        target = label.topk(1,dim=1)
+        pred_list.append(pred)
+        target_list.append(target)
+    
+    acc = cls_accuracy(torch.cat(pred_list,0), torch.cat(target_list,0))
+    return acc
+
+
 def reduce_sum(inputs, dim=None, keep_dim=False):
     if dim is None:
         return torch.sum(inputs)
