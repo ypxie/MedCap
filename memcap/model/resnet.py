@@ -163,9 +163,10 @@ class ResNet(nn.Module):
 
         x = self.layer4(x)
         x = F.dropout(x,self.drop_rate)
-        
-        x = self.avgpool(x)
 
+        x = self.avgpool(x)
+        x = F.dropout(x,self.drop_rate)
+        
         x = x.view(x.size(0), -1)
         x = self.fc(x)
 
