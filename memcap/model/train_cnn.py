@@ -3,6 +3,8 @@ import os
 import argparse
 
 home = os.path.expanduser('~')
+#dirname = os.path.dirname(__file__)
+#print dirname
 
 projroot = os.path.join(os.getcwd()) 
 
@@ -58,16 +60,16 @@ if  __name__ == '__main__':
     parser.add_argument('--show_progress', action='store_false', default=True,
                         help='show the training process using images')
 
-    parser.add_argument('--batch-size', type=int, default=2, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=32, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--maxepoch', type=int, default=128, metavar='N',
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
-    parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
+    parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                         help='SGD momentum (default: 0.5)')
     
-    parser.add_argument('--weight_decay', type=float, default=1e-6,
+    parser.add_argument('--weight_decay', type=float, default=1e-4,
                         help='weight decay for training')
     
     parser.add_argument('--cuda', action='store_false', default=True,
@@ -75,6 +77,9 @@ if  __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
+                        help='how many batches to wait before logging training status')
+
+    parser.add_argument('--valid_freq', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
     args = parser.parse_args()
 
@@ -88,7 +93,9 @@ if  __name__ == '__main__':
         strumodel.cuda()
     
 
-    optimizer = optim.SGD(strumodel.parameters(), lr=args.lr, momentum=args.momentum)
+    optimizer = optim.SGD(strumodel.parameters(), lr=args.lr, 
+                          momentum=args.momentum,
+                          weight_decay=args.weight_decay)
 
 
     with h5py.File(h5dataFile,'r') as h5_data:
@@ -133,32 +140,31 @@ if  __name__ == '__main__':
         batch_count = 0
         for epochNumber in range(args.maxepoch):
             
-            for train_data, train_label in train_flow:
-                #for train_data, train_label in mydata_augmentor.flow(data_batch, label_batch, args.batch_size):
-                optimizer.zero_grad()
-                
-                pred = strumodel.forward(to_variable(train_data, cuda=args.cuda))
-                loss = creteria(pred, to_variable(train_label, cuda=args.cuda) )
-                loss.backward()
-                optimizer.step()
-                batch_count += 1
-                assert not np.isnan(np.mean(loss.data.numpy())) ,"nan error"
-                print('batch count: {}'.format(batch_count))
-                if np.mod(batch_count, args.valid_freq) == 0:
-                    batch_count = 0
-                    acc = validate(model, valid_flow, cuda=args.cuda)
-                    cur_weights = strumodel.state_dict()
-        
-                    print('\nTesting loss: {}, acc: {}, best_score: {}'.format(loss, acc, best_score))
-                    if acc >=  best_score:
-                        best_score = acc
-                        print('update to new best_score: {}'.format(best_score))
-                        best_weight = strumodel.state_dict()
-                        torch.save(best_weight, best_weightspath)
-                    elif best_score - acc > 0.2 * acc: 
-                        strumodel.load_state_dict(best_weight)
-                        print('weights have been reset to best_weights!')
-                    torch.save(cur_weights, weightspath)
+            for data_batch, label_batch, in train_flow:
+                for train_data, train_label in mydata_augmentor.flow(data_batch, label_batch, args.batch_size):
+                    optimizer.zero_grad()
+                    pred = strumodel.forward(to_variable(train_data, cuda=args.cuda))
+                    loss = creteria(pred, to_variable(train_label, cuda=args.cuda) )
+                    loss.backward()
+                    optimizer.step()
+                    batch_count += 1
+                    assert not np.isnan(np.mean(loss.data.cpu().numpy())) ,"nan error"
+                    print('batch count: {}'.format(batch_count))
+                    if np.mod(batch_count, args.valid_freq) == 0:
+                        batch_count = 0
+                        acc = validate(strumodel, valid_flow, cuda=args.cuda)
+                        cur_weights = strumodel.state_dict()
+            
+                        print('\nTesting loss: {}, acc: {}, best_score: {}'.format(loss, acc, best_score))
+                        if acc >=  best_score:
+                            best_score = acc
+                            print('update to new best_score: {}'.format(best_score))
+                            best_weight = strumodel.state_dict()
+                            torch.save(best_weight, best_weightspath)
+                        elif best_score - acc > 3 * acc: 
+                            strumodel.load_state_dict(best_weight)
+                            print('weights have been reset to best_weights!')
+                        torch.save(cur_weights, weightspath)
             
             cur_weights = strumodel.state_dict()
             torch.save(cur_weights, weightspath)

@@ -17,12 +17,12 @@ def validate(model, valid_flow, cuda=False):
     for data, label in valid_flow:
         data, label = to_variable(data, cuda=cuda), to_variable(label, cuda=cuda)
         pred = model.forward(data)
-        target = label.topk(1,dim=1)
+        _, target = label.topk(1,dim=1)
         pred_list.append(pred)
         target_list.append(target)
     
-    acc = cls_accuracy(torch.cat(pred_list,0), torch.cat(target_list,0))
-    return acc
+    acc = cls_accuracy( torch.cat(pred_list,0), torch.cat(target_list,0) )
+    return acc[0].data.cpu().numpy()
 
 def cls_accuracy(output, target, topk=(1,)):
     """
@@ -42,7 +42,7 @@ def cls_accuracy(output, target, topk=(1,)):
     res = []
     for k in topk:
         correct_k = correct[:k].view(-1).float().sum(0)
-        res.append(correct_k.mul_(100.0 / batch_size))
+        res.append(correct_k.mul_(1.0 / batch_size) )
     return res
 
 

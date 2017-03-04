@@ -3,7 +3,6 @@ from copy import copy
 from torch.autograd import Variable
 import random
 from proj_utils.local_utils import pre_process_img
-from proj_utils.torch_utils import to_device, to_variable
 
 class SimpleData():
     def __init__(self, data, Index, batch_size=128, mode = 'channel', 
@@ -52,13 +51,8 @@ class SimpleData():
             self.reset()
             raise StopIteration()
         
-        if self.cuda:
-            return to_variable(self.batch_data[0:thisnum].astype('float32')).cuda(), \
-                to_variable(self.batch_label[0:thisnum].astype('float32')).cuda()
-        else:
-            return to_variable(self.batch_data[0:thisnum].astype('float32')), \
-                to_variable(self.batch_label[0:thisnum].astype('float32'))
-               
+        
+        return self.batch_data[0:thisnum].astype(np.float32), self.batch_label[0:thisnum].astype(np.float32)
 
     def __iter__(self):
         return self
