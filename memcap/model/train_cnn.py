@@ -150,7 +150,7 @@ if  __name__ == '__main__':
                     optimizer.step()
                     batch_count += 1
                     assert not np.isnan(np.mean(loss.data.cpu().numpy())) ,"nan error"
-                    print('batch count: {}'.format(batch_count))
+                    print('epoch number {}, batch count: {}'.format(epochNumber, batch_count))
                     if np.mod(batch_count, args.valid_freq) == 0:
                         batch_count = 0
                         acc = validate(strumodel, valid_flow, cuda=args.cuda)
