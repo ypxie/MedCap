@@ -140,7 +140,7 @@ if  __name__ == '__main__':
         best_score = 0
         batch_count = 0
         for epochNumber in range(args.maxepoch):
-            
+            batch_count = 0
             for data_batch, label_batch, in train_flow:
                 for train_data, train_label in mydata_augmentor.flow(data_batch, label_batch, args.batch_size):
                     optimizer.zero_grad()
@@ -151,8 +151,7 @@ if  __name__ == '__main__':
                     batch_count += 1
                     assert not np.isnan(np.mean(loss.data.cpu().numpy())) ,"nan error"
                     print('epoch number {}, batch count: {}'.format(epochNumber, batch_count))
-                    if np.mod(batch_count, args.valid_freq) == 0:
-                        batch_count = 0
+                    if np.mod(batch_count, args.valid_freq) == 0:                      
                         acc = validate(strumodel, valid_flow, cuda=args.cuda)
                         cur_weights = strumodel.state_dict()
             
