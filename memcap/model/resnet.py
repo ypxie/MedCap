@@ -2,7 +2,7 @@ import torch.nn as nn
 import math
 import torch.utils.model_zoo as model_zoo
 import torch
-
+from torch.nn import functional as F
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
            'resnet152']
 
@@ -102,8 +102,10 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes=1000, feature_maps=[64,128,256,512]):
+    def __init__(self, block, layers, num_classes=1000, feature_maps=[64,128,256,512], drop_rate=0.33):
         self.inplanes = 64
+        self.drop_rate = drop_rate
+
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -148,12 +150,20 @@ class ResNet(nn.Module):
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
+        x = F.dropout(x,self.drop_rate)
 
         x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
+        x = F.dropout(x,self.drop_rate)
 
+        x = self.layer2(x)
+        x = F.dropout(x,self.drop_rate)
+
+        x = self.layer3(x)
+        x = F.dropout(x,self.drop_rate)
+
+        x = self.layer4(x)
+        x = F.dropout(x,self.drop_rate)
+        
         x = self.avgpool(x)
 
         x = x.view(x.size(0), -1)

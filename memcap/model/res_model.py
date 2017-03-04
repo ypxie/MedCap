@@ -76,3 +76,45 @@ class BladderResnet(nn.Module):
         #att = spatialAdaAvgPool(x,14,14).squeeze().permute(1, 2, 0)
 
         return fc, [att]
+
+class SimpleVGG(nn.Module):
+    def __init__(self, num_classes=4,feature_maps=[32,64,128,256], 
+                 model_path = None, pretrained=False):
+        super(BladderResnet, self).__init__()
+
+        _model = ResNet(BasicBlock, [2, 2, 2, 2], num_classes= num_classes, feature_maps = feature_maps)
+        if pretrained:
+            _model.load_state_dict(model_path)
+        self.resnet = _model
+    
+    def forward(self, img):
+        return self.resnet.forward(img)
+
+    def get_feature(self, x):
+        '''
+        Parameter:
+        ---------
+        x: Tensor of shape (Nsample, channel, row, col)
+        
+        Returns:
+        tuple(fc, att_list):
+            fc: Tensor of shape (Nsample, channel of last conv)
+            att_list: list of Tensor (Nsample, row, col, channel)
+        '''
+        
+        x = self.resnet.conv1(x)
+        x = self.resnet.bn1(x)
+        x = self.resnet.relu(x)
+        x = self.resnet.maxpool(x)
+
+        x = self.resnet.layer1(x)
+        x = self.resnet.layer2(x)
+        x = self.resnet.layer3(x)
+        x = self.resnet.layer4(x)
+        
+        #fc = x.mean(2).mean(3).squeeze()
+        fc = self.resnet.avgpool(x)
+        att = x.permute(0, 2, 3,1)
+        #att = spatialAdaAvgPool(x,14,14).squeeze().permute(1, 2, 0)
+
+        return fc, [att]
