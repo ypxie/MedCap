@@ -14,7 +14,6 @@ modelsubfolder = 'residule_conclusion_bladder'
 modelfolder = os.path.join(modelroot, 'Model',trainingset,modelsubfolder)
 sys.path.insert(0, os.path.join(projroot, 'memcap') )
 
-
 from time import time
 import numpy as np
 
@@ -59,7 +58,7 @@ if  __name__ == '__main__':
     parser.add_argument('--show_progress', action='store_false', default=True,
                         help='show the training process using images')
 
-    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=2, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--maxepoch', type=int, default=128, metavar='N',
                         help='number of epochs to train (default: 10)')
@@ -71,7 +70,7 @@ if  __name__ == '__main__':
     parser.add_argument('--weight_decay', type=float, default=1e-6,
                         help='weight decay for training')
     
-    parser.add_argument('--cuda', action='store_true', default=False,
+    parser.add_argument('--cuda', action='store_false', default=True,
                         help='enables CUDA training')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
@@ -134,19 +133,20 @@ if  __name__ == '__main__':
         batch_count = 0
         for epochNumber in range(args.maxepoch):
             
-            for data_batch, label_batch in train_flow:
-                for train_data, train_label in mydata_augmentor.flow(data_batch, label_batch, args.batch_size):
-                    optimizer.zero_grad()
-                    pred = strumodel.forward(to_variable(train_data))
-                    loss = creteria(pred, to_variable(train_label) )
-                    loss.backward()
-                    optimizer.step()
-                    batch_count += 1
-                    assert not np.isnan(np.mean(loss)) ,"nan error"
+            for train_data, train_label in train_flow:
+                #for train_data, train_label in mydata_augmentor.flow(data_batch, label_batch, args.batch_size):
+                optimizer.zero_grad()
                 
+                pred = strumodel.forward(to_variable(train_data, cuda=args.cuda))
+                loss = creteria(pred, to_variable(train_label, cuda=args.cuda) )
+                loss.backward()
+                optimizer.step()
+                batch_count += 1
+                assert not np.isnan(np.mean(loss.data.numpy())) ,"nan error"
+                print('batch count: {}'.format(batch_count))
                 if np.mod(batch_count, args.valid_freq) == 0:
                     batch_count = 0
-                    acc = validate(model, valid_flow)
+                    acc = validate(model, valid_flow, cuda=args.cuda)
                     cur_weights = strumodel.state_dict()
         
                     print('\nTesting loss: {}, acc: {}, best_score: {}'.format(loss, acc, best_score))

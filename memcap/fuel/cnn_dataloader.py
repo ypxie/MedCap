@@ -3,10 +3,11 @@ from copy import copy
 from torch.autograd import Variable
 import random
 from proj_utils.local_utils import pre_process_img
+from proj_utils.torch_utils import to_device, to_variable
 
 class SimpleData():
     def __init__(self, data, Index, batch_size=128, mode = 'channel', 
-                 norm = True):
+                 norm = True, cuda=True):
         '''
         data: a hdf5 opened pointer
         Index: one array index, [3,5,1,9, 100] index of candidates 
@@ -19,8 +20,8 @@ class SimpleData():
 
         self.Totalnum = len(Index)
 
-        self.batch_data = np.zeros( (batch_size,) + self.images.shape[1::])
-        self.batch_label = np.zeros((batch_size,) + self.conclusion.shape[1::])
+        self.batch_data = np.zeros( (batch_size,) + self.images.shape[1::],dtype=np.float32)
+        self.batch_label = np.zeros((batch_size,) + self.conclusion.shape[1::], dtype=np.float32)
 
         self.reset()
 
@@ -50,8 +51,14 @@ class SimpleData():
         if self.chunkidx > self.numberofchunk:
             self.reset()
             raise StopIteration()
-
-        return self.batch_data[0:thisnum] , self.batch_label[0:thisnum]
+        
+        if self.cuda:
+            return to_variable(self.batch_data[0:thisnum].astype('float32')).cuda(), \
+                to_variable(self.batch_label[0:thisnum].astype('float32')).cuda()
+        else:
+            return to_variable(self.batch_data[0:thisnum].astype('float32')), \
+                to_variable(self.batch_label[0:thisnum].astype('float32'))
+               
 
     def __iter__(self):
         return self
@@ -60,7 +67,7 @@ class SimpleData():
 
 class CNNData():
     def __init__(self, data, batch_size=128, split_dict= None, 
-                 refer_dict = None):
+                 refer_dict = None, cuda=False):
         '''
         Construct train, valid and test iterator
 
@@ -75,9 +82,9 @@ class CNNData():
 
         self.get_split_ind()
         
-        self.train_cls = SimpleData(self.data, self.train, self.batch_size)
-        self.test_cls  = SimpleData(self.data, self.test, self.batch_size)
-        self.valid_cls = SimpleData(self.data, self.valid, self.batch_size)
+        self.train_cls = SimpleData(self.data, self.train, self.batch_size, cuda=cuda)
+        self.test_cls  = SimpleData(self.data, self.test, self.batch_size, cuda=cuda)
+        self.valid_cls = SimpleData(self.data, self.valid, self.batch_size, cuda=cuda)
 
 
     def get_split_ind(self):

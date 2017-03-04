@@ -7,16 +7,15 @@ import torch.nn as nn
 
 def creteria(pred, label):
     # both of them should be Tensor (N, dim)
-    target = to_device(Variable(torch.from_numpy(label.cpu().data.argmax(axis=1))).long(), pre)
     _, target = label.topk(1, dim=1)
-    loss = F.nll_loss(F.log_softmax(pred), target)
+    loss = F.nll_loss(F.log_softmax(pred), target[:,0])
     return loss
 
-def validate(model, valid_flow):
+def validate(model, valid_flow, cuda=False):
     acc = []
     pred_list, target_list = [], []
     for data, label in valid_flow:
-        data, label = to_variable(data), to_variable(label)
+        data, label = to_variable(data, cuda=cuda), to_variable(label, cuda=cuda)
         pred = model.forward(data)
         target = label.topk(1,dim=1)
         pred_list.append(pred)
@@ -47,12 +46,15 @@ def cls_accuracy(output, target, topk=(1,)):
     return res
 
 
-def to_variable(x, requires_grad=False):
+def to_variable(x, requires_grad=False, cuda=False):
     if type(x) is Variable:
         return x
     if type(x) is np.ndarray:
         x = torch.from_numpy(x)
-    return Variable(x, requires_grad=requires_grad)
+    if cuda:
+       return Variable(x, requires_grad=requires_grad).cuda()
+    else:
+       return Variable(x, requires_grad=requires_grad) 
 
 def reduce_sum(inputs, dim=None, keep_dim=False):
     if dim is None:

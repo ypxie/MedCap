@@ -608,8 +608,8 @@ class NumpyArrayIterator(Iterator):
         self.save_prefix = save_prefix 
         self.save_format = save_format
         self.elastic_label = elastic_label
-        self.batch_x = np.zeros(tuple([batch_size] + list(self.X.shape)[1:]))
-        self.batch_y = np.zeros(tuple([batch_size] + list(self.y.shape)[1:]))
+        self.batch_x = np.zeros(tuple([batch_size] + list(self.X.shape)[1:]), dtype = 'float32')
+        self.batch_y = np.zeros(tuple([batch_size] + list(self.y.shape)[1:]), dtype = 'float32')
         
         super(NumpyArrayIterator, self).__init__(X.shape[0], batch_size, shuffle, seed, **kwargs)
 
@@ -644,6 +644,6 @@ class NumpyArrayIterator(Iterator):
                                                                   format=self.save_format)
                 img.save(os.path.join(self.save_to_dir, fname))
 
-        return self.batch_x[0:current_batch_size], self.batch_y[0:current_batch_size]
+        return self.batch_x[0:current_batch_size].astype('float32'), self.batch_y[0:current_batch_size].astype('float32')
 
 
