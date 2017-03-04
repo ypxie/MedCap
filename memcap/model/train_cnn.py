@@ -134,6 +134,7 @@ if  __name__ == '__main__':
         best_weightspath = os.path.join(modelfolder,'best_weights.pth')
 
         if args.reuse_weigths == 1 and os.path.isfile(best_weightspath):
+            print('reload weights from {}'.format(best_weightspath))
             strumodel.load_state_dict(torch.load(best_weightspath) )# 12)
 
         best_score = 0
