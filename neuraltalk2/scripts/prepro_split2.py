@@ -60,15 +60,15 @@ def build_vocab(imgs, params):
     for sent in img['sentences']:
       for w in sent['tokens']:
         counts[w] = counts.get(w, 0) + 1
-  cw = sorted([(count,w) for w,count in counts.iteritems()], reverse=True)
+  cw = sorted([(count,w) for w,count in counts.items()], reverse=True)
   print 'top words and their counts:'
   print '\n'.join(map(str,cw[:20]))
 
   # print some stats
   total_words = sum(counts.itervalues())
   print 'total words:', total_words
-  bad_words = [w for w,n in counts.iteritems() if n <= count_thr]
-  vocab = [w for w,n in counts.iteritems() if n > count_thr]
+  bad_words = [w for w,n in counts.items() if n <= count_thr]
+  vocab = [w for w,n in counts.items() if n > count_thr]
   bad_count = sum(counts[w] for w in bad_words)
   print 'number of bad words: %d/%d = %.2f%%' % (len(bad_words), len(counts), len(bad_words)*100.0/len(counts))
   print 'number of words in vocab would be %d' % (len(vocab), )
@@ -85,7 +85,7 @@ def build_vocab(imgs, params):
   print 'max length sentence in raw data: ', max_len
   print 'sentence length distribution (count, number of words):'
   sum_len = sum(sent_lengths.values())
-  for i in xrange(max_len+1):
+  for i in range(max_len+1):
     print '%2d: %10d   %f%%' % (i, sent_lengths.get(i,0), sent_lengths.get(i,0)*100.0/sum_len)
 
   # lets now produce the final annotations

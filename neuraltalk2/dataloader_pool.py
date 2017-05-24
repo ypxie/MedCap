@@ -184,7 +184,7 @@ class BlobFetcher():
         if len(self.fifo) == 0:
             self.cur_idx = self.dataloader.iterators[self.split]
         split_ix = self.dataloader.split_ix[self.split]
-        for i in xrange(512 - len(self.fifo)):
+        for i in range(512 - len(self.fifo)):
             ix = split_ix[self.cur_idx]
             if self.cur_idx + 1 >= len(split_ix):
                 self.cur_idx = 0

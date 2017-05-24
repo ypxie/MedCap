@@ -14,8 +14,8 @@ def start_end(a,b,c):
 def spatialAdaAvgPool(x, oH, oW):
     B, C, iH, iW  = x.size()
     output = Variable(x.data.new(B, C, oH, oW))
-    for oh in xrange(oH):
-        for ow in xrange(oW):
+    for oh in range(oH):
+        for ow in range(oW):
             i1, i2 = start_end(oh, oH, iH)
 
             j1, j2 = start_end(ow, oW, iW)

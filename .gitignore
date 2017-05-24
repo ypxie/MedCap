@@ -4,6 +4,7 @@
 neuraltalk2/data/*
 memcap/data/*
 Data/*
+BackUpCap/*
 *.swp
 .vscode
 *~
